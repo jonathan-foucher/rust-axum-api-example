@@ -1,5 +1,8 @@
-use axum::{routing::get, Router};
+mod models;
+mod routers;
+use axum::Router;
 use std::env;
+use crate::routers::movie_router::get_movie_routes;
 
 const DEFAULT_HTTP_PORT: u16 = 8080;
 
@@ -12,13 +15,9 @@ async fn main() {
         .unwrap_or(DEFAULT_HTTP_PORT);
 
     let app = Router::new()
-        .route("/", get(root));
+        .nest("/api/movies", get_movie_routes());
 
     log::info!("Application is starting on port {}", http_port);
-    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{}", http_port)).await.unwrap();
+    let listener = tokio::net::TcpListener::bind(format!("127.0.0.1:{}", http_port)).await.unwrap();
     axum::serve(listener, app).await.unwrap();
-}
-
-async fn root() -> &'static str {
-    "Hello, World!"
 }
